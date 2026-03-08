@@ -1,4 +1,4 @@
-
+altair
 numpy
 pandas
 matplotlib
@@ -6,4 +6,4 @@ scikit-learn
 pillow
 seaborn
 streamlit
-opencv-python
+opencv-python-headless
