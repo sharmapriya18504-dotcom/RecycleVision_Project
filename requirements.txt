@@ -6,4 +6,4 @@ scikit-learn
 pillow
 seaborn
 streamlit
-opencv-python-headless
+opencv-python
