@@ -1,0 +1,12 @@
+# Tell Vercel to only build the Next.js Frontend and ignore Python/Backend files
+backend/
+models/
+legacy_backup/
+database/
+reports/
+scripts/
+docs/
+*.py
+requirements.txt
+runtime.txt
+.python-version
