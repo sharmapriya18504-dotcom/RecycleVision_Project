@@ -1,29 +1,35 @@
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras import layers, models
+from tensorflow.keras.layers import Dense, GlobalAveragePooling2D
+from tensorflow.keras.models import Model
 import os
 
-IMG_SIZE = 224
+IMG_SIZE = (224,224)
 BATCH_SIZE = 32
-EPOCHS = 5
+EPOCHS = 15
+
+train_dir = "dataset"
 
 datagen = ImageDataGenerator(
     rescale=1./255,
-    validation_split=0.2
+    validation_split=0.2,
+    rotation_range=20,
+    zoom_range=0.2,
+    horizontal_flip=True
 )
 
 train_data = datagen.flow_from_directory(
-    'dataset',
-    target_size=(IMG_SIZE, IMG_SIZE),
+    train_dir,
+    target_size=IMG_SIZE,
     batch_size=BATCH_SIZE,
     class_mode='categorical',
     subset='training'
 )
 
 val_data = datagen.flow_from_directory(
-    'dataset',
-    target_size=(IMG_SIZE, IMG_SIZE),
+    train_dir,
+    target_size=IMG_SIZE,
     batch_size=BATCH_SIZE,
     class_mode='categorical',
     subset='validation'
@@ -32,17 +38,19 @@ val_data = datagen.flow_from_directory(
 base_model = MobileNetV2(
     weights='imagenet',
     include_top=False,
-    input_shape=(IMG_SIZE, IMG_SIZE, 3)
+    input_shape=(224,224,3)
 )
 
-base_model.trainable = False
+for layer in base_model.layers:
+    layer.trainable = False
 
-model = models.Sequential([
-    base_model,
-    layers.GlobalAveragePooling2D(),
-    layers.Dense(128, activation='relu'),
-    layers.Dense(train_data.num_classes, activation='softmax')
-])
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+x = Dense(128, activation='relu')(x)
+
+predictions = Dense(train_data.num_classes, activation='softmax')(x)
+
+model = Model(inputs=base_model.input, outputs=predictions)
 
 model.compile(
     optimizer='adam',
@@ -50,9 +58,14 @@ model.compile(
     metrics=['accuracy']
 )
 
-model.fit(train_data, validation_data=val_data, epochs=EPOCHS)
+model.fit(
+    train_data,
+    validation_data=val_data,
+    epochs=EPOCHS
+)
 
 os.makedirs("models", exist_ok=True)
+
 model.save("models/best_model.h5")
 
-print("Training Completed ✅")
+print("Training Completed")

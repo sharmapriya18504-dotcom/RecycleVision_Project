@@ -171,7 +171,8 @@ elif page == "About Me":
 
     st.write(
     """
-    Hello, my name is **Priya Sharma**.
+    Hello, my name is **Priya sharma
+      **.
 
     I am a student interested in **Artificial Intelligence,
     Machine Learning, and Data Science**.
